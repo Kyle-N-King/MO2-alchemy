@@ -146,9 +146,38 @@ VALUES
 ('waterstone', 0.44,4),
 ('white bear carc', 0.44,4);
 
+ALTER TABLE multiplier MODIFY COLUMN price decimal(10,5);
 UPDATE multiplier SET price = 0.95 WHERE ing_name = 'skadite';
 UPDATE multiplier SET price = 0.03 WHERE ing_name = 'sponge';
 UPDATE multiplier SET price = 0.05 WHERE ing_name = 'gold';
+UPDATE multiplier SET price = 0.02 WHERE ing_name = 'jadeite';
+UPDATE multiplier SET price = 0.0325 WHERE ing_name = 'clothos spider queen carc';
+UPDATE multiplier SET price = 0.012 WHERE ing_name = 'great horn';
+UPDATE multiplier SET price = 0.04 WHERE ing_name = 'calx fish';
+UPDATE multiplier SET price = 0.0275 WHERE ing_name = 'nitre spider queen carc';
+UPDATE multiplier SET price = 0.01875 WHERE ing_name = 'pirum juice';
+UPDATE multiplier SET price = 0.012 WHERE ing_name = 'electrum';
+UPDATE multiplier SET price = 0.0125 WHERE ing_name = 'jambura juice';
+UPDATE multiplier SET price = 8.5 WHERE ing_name = 'gamun oil';
+UPDATE multiplier SET price = 0.004 WHERE ing_name = 'compact horn';
+UPDATE multiplier SET price = 0.02 WHERE ing_name = 'basileus';
+UPDATE multiplier SET price = 0.012 WHERE ing_name = 'mino';
+UPDATE multiplier SET price = 0.5 WHERE ing_name = 'kyanite';
+UPDATE multiplier SET price = 0.01 WHERE ing_name = 'pirum';
+UPDATE multiplier SET price = 0.0475 WHERE ing_name = 'waterstone';
+UPDATE multiplier SET price = 0.0054 WHERE ing_name = 'white bear carc';
+
+UPDATE multiplier
+SET
+	ing_name = 'pirum juice'
+WHERE
+	ing_name = 'prium juice';
+
+UPDATE multiplier
+SET
+	ing_name = 'pirum'
+WHERE
+	ing_name = 'pirium';
 
 SELECT * FROM multiplier;
 
@@ -446,142 +475,3 @@ DELIMITER ;
 DROP TABLE IF EXISTS allresults;
 DROP PROCEDURE allloopseadew;
 CALL allloopseadew('sea dew', 100, 'skadite', 0, 10);
-
-
--- trying loop?
-DELIMITER $$
-CREATE PROCEDURE loopseadew2(IN p_base_name VARCHAR(255), IN p_base_amount integer, IN p_ing_name VARCHAR(255), p_ing_amount integer, p_pot_units INTEGER(3))
-BEGIN
-	DECLARE x int;
-    
-    SET x = 0;
-    
-    loop1: LOOP
-		SET x = x + 1;
-        CALL sea_dew_potion('sea dew', 100, 'skadite', x, 10);
-        IF x = 18 THEN
-			LEAVE loop1;
-		END IF;
-	END LOOP loop1;
-    SELECT p_base_name, p_base_amount, p_ing_name, p_ing_amount,
-		m.price * p_ing_amount AS cost
-	FROM
-		multiplier m
-	WHERE
-		m.ing_name = p_ing_name;
-END$$
-DELIMITER ;
-
-DROP PROCEDURE loopseadew2;
-CALL loopseadew2('sea dew', 100, 'skadite', 0, 10);
-
-
-DELIMITER $$
-CREATE PROCEDURE loopsalvia(IN p_base_name VARCHAR(255), IN p_base_amount integer, IN p_ing_name VARCHAR(255), p_ing_amount integer, p_pot_units INTEGER(3))
-BEGIN
-	DECLARE x int;
-    
-    SET x = 0;
-    
-    loop1: LOOP
-		SET x = x + 1;
-        CALL salvia_oil_potion('salvia oil', 100, 'skadite', x, 10);
-        IF x = 18 THEN
-			LEAVE loop1;
-		END IF;
-	END LOOP loop1;
-    SELECT p_base_name, p_base_amount, p_ing_name, p_ing_amount,
-		m.price * p_ing_amount AS cost
-	FROM
-		multiplier m
-	WHERE
-		m.ing_name = p_ing_name;
-END$$
-DELIMITER ;
-
-DROP PROCEDURE loopsalvia;
-CALL loopsalvia('salvia oil', 100, 'skadite', 0, 10);
-
-
-DELIMITER $$
-CREATE PROCEDURE loopseadew(IN p_base_name VARCHAR(255), IN p_base_amount integer, IN p_ing_name VARCHAR(255), p_ing_amount integer, p_pot_units INTEGER(3))
-BEGIN
-	DECLARE x int;
-    
-    SET x = 0;
-    
-    loop1: LOOP
-		SET x = x + 1;
-        CALL sea_dew_potion('sea dew', 100, 'skadite', x, 10);
-        IF x = 18 THEN
-			LEAVE loop1;
-		END IF;
-	END LOOP loop1;
-    SELECT p_base_name, p_base_amount, p_ing_name, p_ing_amount,
-		m.price * p_ing_amount AS cost
-	FROM
-		multiplier m
-	WHERE
-		m.ing_name = p_ing_name;
-END$$
-DELIMITER ;
-
-
-DROP PROCEDURE loopseadew;
-CALL loopseadew('sea dew', 100, 'skadite', 0, 10);
-
-
-
--- all in one?
-DELIMITER $$
-CREATE PROCEDURE allloopseadew(IN p_base_name VARCHAR(255), IN p_base_amount integer, IN p_ing_name VARCHAR(255), p_ing_amount integer, p_pot_units INTEGER(3))
-BEGIN
-	DECLARE x decimal(10,3);
-    DECLARE v_heal decimal(10,3);
-    DECLARE v_cost decimal(10,3);
-    DECLaRE v_total_amount int(3);
-    CREATE TEMPORARY TABLE allresults (p_base_name varchar(255), p_base_amount int(3), p_ing_name VARCHAR(255), p_ing_amount int(3), heal decimal(10,2), cost decimal(10,2));
-    
-    SET x = 0;
-   
-    loop1: LOOP
-		SET x = x + 1;
-        SET v_total_amount = 
-			(SELECT p_base_amount + x);
-		SET v_heal = 
-			(SELECT 
-				round(max((2*(2.1*(p_base_amount/v_total_amount))*1*(1+sqrt(x/v_total_amount)*m.multiplier_value)*p_pot_units)),3)
-			FROM
-				multiplier m
-			WHERE
-				m.ing_name = p_ing_name);
-		SET v_cost = 
-			(SELECT 
-				m.price * x
-			FROM
-				multiplier m
-			WHERE
-				m.ing_name = p_ing_name);
-        CALL sea_dew_potion('sea dew', 100, 'skadite', x, 10);
-        IF x = 18 THEN
-			LEAVE loop1;
-		END IF;
-		
-        INSERT INTO allresults
-        VALUES(p_base_name, p_base_amount, p_ing_name, x, v_heal, v_cost);
-	END LOOP loop1;
-    SELECT p_base_name, p_base_amount, p_ing_name, p_ing_amount,
-		m.price * p_ing_amount AS cost
-	FROM
-		multiplier m
-	WHERE
-		m.ing_name = p_ing_name;
-	SELECT * FROM allresults;
-END$$
-DELIMITER ;
-
-DROP TABLE IF EXISTS allresults;
-DROP PROCEDURE allloopseadew;
-CALL allloopseadew('sea dew', 100, 'skadite', 0, 10);
-
-    
