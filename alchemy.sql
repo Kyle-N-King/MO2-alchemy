@@ -369,6 +369,54 @@ CALL salvia_oil_potion('salvia oil', 100, 'sponge', 9, 10);
 
 
 
+#POTION WITH MORE THAN  1 MULTIPLIER
+DELIMITER $$
+
+CREATE PROCEDURE salvia_potion_2 (
+  IN p_base_name VARCHAR(255),
+  IN p_base_amount INT,
+  IN p_ing_name_1 VARCHAR(255),
+  IN p_ing_amount_1 INT,
+  IN p_ing_name_2 VARCHAR(255),
+  IN p_ing_amount_2 INT,
+  IN p_pot_units INT(3)
+)
+BEGIN
+  DECLARE v_total_amount INT(3)
+    DEFAULT p_base_amount + p_ing_amount_1 + p_ing_amount_2;
+
+  SELECT
+    p_base_name,
+    p_base_amount,
+    p_ing_name_1,
+    p_ing_amount_1,
+    p_ing_name_2,
+    p_ing_amount_2,
+    ROUND(
+		  MAX(
+				(2 * (2.1 * (p_base_amount / v_total_amount)) *
+					(1 + SQRT(p_ing_amount_1 / v_total_amount) *
+			m_1.multiplier_value) *
+					(1 + SQRT(p_ing_amount_2 / v_total_amount) *
+					m_2.multiplier_value) * p_pot_units)
+			),
+		3)  AS heal,
+    m_1.price * p_ing_amount_1 +
+    m_2.price * p_ing_amount_2  AS cost
+  FROM
+    multiplier m_1
+    INNER JOIN multiplier m_2 on
+      m_2.ing_name = p_ing_name_2
+  WHERE
+    m_1.ing_name = p_ing_name_1;
+  
+END$$
+
+DELIMITER ;
+
+DROP PROCEDURE SALVIA_POTION_2;
+CALL salvia_potion_2('sea dew', 100, 'gold', 10, 'skadite', 1, 10);
+
 
 
 
@@ -419,7 +467,9 @@ FROM
 GROUP by c.ing_class, m.tier
 ORDER BY 
 	c.ing_class;
-    
+ 
+ 
+ 
 -- Health vs cost: case study
 DELIMITER $$
 CREATE PROCEDURE allloopseadew(IN p_base_name VARCHAR(255), IN p_base_amount integer, IN p_ing_name VARCHAR(255), p_ing_amount integer, p_pot_units INTEGER(3))
