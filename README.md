@@ -17,5 +17,5 @@ This is done by:
 -inserting procedures within other procedures
 
 This information and insights are then exported to Tableau for data visualization, referred to as "Visualization for 'Analysis for potion ingredients in video game Mortal Online 2' project (Tableau Public)" in the Projects section in Linkedin, or provided here:
-https://public.tableau.com/app/profile/kyle.king2235/viz/MortalOnline2Alchemyingredients/Dashboard2
+https://public.tableau.com/app/profile/kyle.king2235/viz/MortalOnline2Alchemyingredients/DashBoard
  
